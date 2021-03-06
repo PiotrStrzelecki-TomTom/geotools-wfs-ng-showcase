@@ -1,5 +1,7 @@
 # geotools-wfs-ng-problem
 
+you'd probably need to change url to geoserver instance running in docker in [application.properties](src/main/resources/application.properties)
+
 steps to reproduce:
 ````
 docker run -d -p 8080:8080 oscarfonts/geoserver:2.17.5
