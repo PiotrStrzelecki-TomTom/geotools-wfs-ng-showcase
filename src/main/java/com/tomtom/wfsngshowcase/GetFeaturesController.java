@@ -1,9 +1,13 @@
 package com.tomtom.wfsngshowcase;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.data.DataStore;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -26,11 +30,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class GetFeaturesController {
 
     private final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
-    private DataStore dataStore;
+    private static final Set<String> TYPENAMES = Set.of("sf:bugsites", "sf:archsites");
+    private Map<String, Pair<SimpleFeatureSource, String>> sources = new HashMap<>();
 
     @Autowired
-    public GetFeaturesController(DataStore dataStore) {
-        this.dataStore = dataStore;
+    public GetFeaturesController(DataStore dataStore) throws IOException {
+        for (String typeName : TYPENAMES) {
+            sources.put(typeName, Pair.of(dataStore.getFeatureSource(typeName),
+                                          dataStore.getSchema(typeName).getGeometryDescriptor().getLocalName()));
+        }
     }
 
     @GetMapping(
@@ -40,8 +48,10 @@ public class GetFeaturesController {
         @PathVariable String typeName,
         @PathVariable String wktGeom) throws IOException, CQLException {
 
-        final SimpleFeatureSource eventsSource = dataStore.getFeatureSource(typeName);
-        final String geometryColumn = dataStore.getSchema(typeName).getGeometryDescriptor().getLocalName();
+        final Pair<SimpleFeatureSource, String> source = sources.get(typeName);
+        final SimpleFeatureSource eventsSource = source.getLeft();
+        final String geometryColumn = source.getRight();
+
         final Filter filter = filterOf(geometryColumn, wktGeom);
         final SimpleFeatureCollection eventsFeatures = eventsSource.getFeatures(new Query(typeName, filter));
         final SimpleFeatureIterator features = eventsFeatures.features();

@@ -2,13 +2,15 @@ package com.tomtom.wfsngshowcase;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Map;
 
 import org.geotools.data.DataStore;
-import org.geotools.data.ows.SimpleHttpClient;
 import org.geotools.data.wfs.WFSDataStore;
 import org.geotools.data.wfs.internal.WFSClient;
 import org.geotools.data.wfs.internal.WFSConfig;
+import org.geotools.http.HTTPClient;
+import org.geotools.http.commons.MultithreadedHttpClientFactory;
 import org.geotools.ows.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +27,8 @@ public class WebAppConfig {
     DataStore createDataStore(@Value("${geoserver.url}") final String geoserverUrl) throws IOException, ServiceException {
         final URL wfsUrl = new URL(geoserverUrl);
         final WFSConfig wfsConfig = WFSConfig.fromParams(Map.of());
-        final SimpleHttpClient httpClient = new SimpleHttpClient();
+        final MultithreadedHttpClientFactory factory = new MultithreadedHttpClientFactory();
+        final HTTPClient httpClient = factory.createClient(Collections.emptyList());
         return new WFSDataStore(new WFSClient(wfsUrl, httpClient, wfsConfig));
     }
 
