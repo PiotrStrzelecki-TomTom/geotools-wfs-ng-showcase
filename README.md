@@ -1,5 +1,7 @@
 # geotools-wfs-ng-problem
 
+see https://osgeo-org.atlassian.net/browse/GEOT-6838
+
 you'd probably need to change url to geoserver instance running in docker in [application.properties](src/main/resources/application.properties)
 
 steps to reproduce:
